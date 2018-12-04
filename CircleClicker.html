@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Circle Clicker</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+	<canvas id="myCanvas" width="520" height="360"></canvas>
+
+	<div style="text-align:center;">
+		
+		<p>Circle Color:
+		<select id="circlecolor">
+		  <option value="green">Green</option>
+		  <option value="red">Red</option>
+		  <option value="blue">Blue</option>
+		  <option value="black">Black</option>
+		  <option value="random">Random</option>
+		</select> 
+		</p>
+		
+		<p>Circle Size:
+		<select id="circlesize">
+		  <option value="5">Tiny</option>
+		  <option value="10">Small</option>
+		  <option selected="selected" value="20">Normal</option>
+		  <option value="50">Massive</option>
+		</select> 
+		</p>
+		
+		<p>Game Speed:
+		<select id="gamespeed">
+		  <option value="750">Slow</option>
+		  <option selected="selected" value="500">Normal</option>
+		  <option value="390">Fast</option>
+		  <option value="290">Ludicrous</option>
+		  <option value="85">Godlike</option>
+		</select> 
+		</p>
+		
+		<button onclick="StartGame(true)">Begin!</button>
+		<button onclick="StartGame(false)">Stop!</button>
+		
+	</div>
+
+<script>
+
+	var canvas = document.getElementById("myCanvas");
+	var ctx = canvas.getContext("2d");
+	var circleRadius;
+	var circleColor;
+	var randomColor = false;
+	var min=20; 
+	var max=canvas.width - 20;  
+	var min2 = 20;
+	var max2 = canvas.height - 20;
+	var coords = [];
+	var gameTimer;
+	var gameSpeed;
+
+document.getElementById('myCanvas').addEventListener('click',function(evt){getCursorPosition(myCanvas, evt);},false);
+	
+	function DrawCircle(){
+	
+		if (randomColor === true) {
+			circleColor = getRandomColor();
+		}
+	
+		var random = Math.floor(Math.random() * (+max - +min)) + +min; 
+		var random2 = Math.floor(Math.random() * (+max2 - +min2)) + +min2; 
+		ctx.beginPath();
+		ctx.arc(random, random2, circleRadius, 0, Math.PI*2, false);
+		ctx.fillStyle = circleColor;
+		ctx.fill();
+		ctx.closePath();
+		coords.push(random + ':' + random2); 
+	}
+		
+	function getCursorPosition(canvas, event) {
+		var rect = canvas.getBoundingClientRect();
+		var x = event.clientX - rect.left;
+		var y = event.clientY - rect.top;
+		KillCircle(x,y);
+	}
+
+	function KillCircle(killx,killy){
+		//remove from array and draw blank circle in its place
+		for (i = 0; i < coords.length; i++) {
+			var circlex;
+			var circley;
+			var coord = coords[i].split(":");
+			circlex = coord[0];
+			circley = coord[1];
+			if (Math.sqrt(Math.pow(killx - circlex,2) + Math.pow(killy - circley,2)) < circleRadius){
+				coords.splice(coords.indexOf(circlex + ':' + circley), 1);
+				ctx.beginPath();
+				
+				// something weird here. I can't make the kill radius work for some reason.
+				//ctx.arc(circlex, circley, circleRadius, 0, Math.PI*2, false);
+        ctx.arc(circlex, circley, 21, 0, Math.PI*2, false);
+				ctx.fillStyle = "#eeeeee";
+				ctx.fill();
+				ctx.closePath();
+			}	
+		}
+	}
+	
+	function getRandomColor() {
+	  var letters = '0123456789ABCDEF';
+	  var color = '#';
+	  for (var i = 0; i < 6; i++) {
+		color += letters[Math.floor(Math.random() * 16)];
+	  }
+	  return color;
+	}
+	
+	function StartGame(gameFlag){
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		coords = [];
+		gameSpeed = document.getElementById('gamespeed').value;
+		circleRadius = document.getElementById('circlesize').value;
+		circleColor = document.getElementById('circlecolor').value;
+		if (circleColor === 'random'){
+			randomColor = true;
+		}else{
+			randomColor = false;
+		}
+		
+		if (gameFlag === true){
+			clearInterval(gameTimer);
+			gameTimer = setInterval(DrawCircle, gameSpeed);
+		}else{
+			clearInterval(gameTimer);
+		}
+	}
+
+</script>
+
+</body>
+</html>
